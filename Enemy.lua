@@ -1,5 +1,5 @@
 --enemy class 
-
+require("UTIL")
 --Enemy sprites are created out of individual pixels 
 --they are drawn based off of references to a grid atlas
 --                                   X
@@ -57,7 +57,7 @@ end
 function Enemy:show()
 	-- 
 	for k, v in pairs(self.body) do
-		print("v: "..v[1])
+		--print("v: "..v[1])
 		love.graphics.rectangle("fill",v[1], v[2],1,1)
 	end
 end
@@ -69,10 +69,14 @@ function Enemy:check_collisions(...)
 	if type(pos_in[1][1]) ~= "number" then
 		pos_in = pos_in[1]
 	end
-	for ky,p in pairs(pos_in)do 
-		for k,v in pairs(self.body) do
-			if v[1] == p[1] and v[2] == p[2] then
-				collision_detected = true
+	for ky,p in pairs(pos_in)do
+		local dis_between = math.sqrt((math.abs(p[1]-Player.pos.x)^2 + 
+			 		  	              (math.abs(p[2]-Player.pos.y))^2)) 
+		if dis_between < 1.5 then
+			for k,v in pairs(self.body) do
+				if v[1] == p[1] and v[2] == p[2] then
+					collision_detected = true
+				end
 			end
 		end
 	end
