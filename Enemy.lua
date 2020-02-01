@@ -8,7 +8,7 @@ Enemy = {
 	
 	}
 	 
-}
+
 
 --Enemy sprites are created out of individual pixels 
 --they are drawn based off of references to a grid atlas
@@ -54,20 +54,23 @@ function Enemy:show()
 
 	t_pixels = get_sprite(self.pos, self.variant, self.direction)	 
 
-	for k, v in t_pixels do
-		love.graphics.rectangle(v[1], v[2],1,1)
+	for k, v in pairs(t_pixels) do
+		print("v: "..v[1])
+		love.graphics.rectangle("fill",v[1], v[2],1,1)
 	end
 end
 
 function get_sprite(enemy_pos,variant, direction)
-	local pixels_out = {}
+	pixels_out = {}
 
-	for k, v in enemy_pixel_maps[variant][direction] do
+	print("var: "..variant.." dir: "..direction)
+	for k, v in pairs(enemy_pixel_maps[variant][direction]) do
 		t_p = {x = enemy_pos.x + pixel_atlas[v][1],
 			   y = enemy_pos.y + pixel_atlas[v][2]
               }
-		table.insert(pixels_out, t_p) 
+		table.insert(pixels_out, {t_p.x,t_p.y}) 
 	end
+	
 	return pixels_out
 
 end

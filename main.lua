@@ -34,7 +34,7 @@ function love.load()
 	color = {{0.78, 0.94,0.85},{0.26,0.32,0.24}}	
 
 	enemies = {}
-	insert(enemies, 1, Enemy:new(nil)
+	table.insert(enemies, 1, Enemy:new(nil))
 	enemies[1]:init_values({10,10}, {0,-1}, "base")
 end
 
@@ -88,6 +88,7 @@ function love.draw( ... )
 	love.graphics.push()
 	love.graphics.scale(scale,scale)
 	Player:show()
+	enemies[1]:show()
 	love.graphics.pop()
 end
 
