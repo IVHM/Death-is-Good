@@ -33,6 +33,9 @@ function Player:move(mov_vec)
 	self.pos.y = self.pos.y + mov_vec.y
 end
 
+function Player:get_pos()
+	return self.pos 
+end
 --Takes in a directional vector and intialize the bullet's properties
 function Player:shoot(shot_vec)
 	print("firing along vector :("..shot_vec.x..", "..shot_vec.y..")")
@@ -49,13 +52,18 @@ function Player:shoot(shot_vec)
 end
 
 -- Checks if the player is colliding with a certain 
-function Player:check_collision(...)
+function Player:check_collisions(...)
 	local collision_detected = false
 	local pos_in = {...}
+	if type(pos_in[1][1]) ~= "number" then
+		pos_in = pos_in[1]
+	end
+
 	for k, p in pairs(pos_in) do
 		for i = 0, self.size - 1, 1 do
 			for j = 0, self.size -1, 1 do 
 				t_p = {self.pos.x + i, self.pos.y + j}
+				--print( "t_p:",t_p[1], t_p[1],"  p:", p[1],p[2])
 				if p[1] == t_p[1] and p[2] == t_p[2] then
 					collision_detected = true
 				end

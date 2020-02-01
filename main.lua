@@ -63,8 +63,17 @@ function love.update( ... )
 
 		if #enemies > 0 then
 			for k, c_enemy in pairs(enemies) do 
-				if Player:check_collision(c_enemy.body) then
-					print("collision detected")
+				if Player:check_collisions(c_enemy.body) then
+					print("player collision detected TABLE")
+				end
+				if Player:check_collisions({Player.pos.x, Player.pos.y}) then
+					print("player collision detected POINT")
+				end
+				if c_enemy:check_collisions(Player:get_body()) then
+					print("Enemy collision detected TABLE")
+				end
+				if c_enemy:check_collisions({10,9}) then
+					print("Enemy collision detected POINT")
 				end
 			end
 		end

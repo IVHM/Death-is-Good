@@ -63,9 +63,12 @@ function Enemy:show()
 end
 
 
-function Enemy:check_collision(...)
+function Enemy:check_collisions(...)
 	local collision_detected = false
 	local pos_in = {...}
+	if type(pos_in[1][1]) ~= "number" then
+		pos_in = pos_in[1]
+	end
 	for ky,p in pairs(pos_in)do 
 		for k,v in pairs(self.body) do
 			if v[1] == p[1] and v[2] == p[2] then
