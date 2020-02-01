@@ -27,7 +27,7 @@ Player = {
 	bullet_prop = {x=0, y=0, w=1, h=1}
 }
 
-
+--Updates players position
 function Player:move(mov_vec)
 	self.pos.x = self.pos.x + mov_vec.x 
 	self.pos.y = self.pos.y + mov_vec.y
@@ -48,6 +48,24 @@ function Player:shoot(shot_vec)
 											self.bullet_prop.h..",".. self.bullet_prop.w)											 
 end
 
+-- Checks if the player is colliding with a certain 
+function Player:check_collision(...)
+	local collision_detected = false
+	local pos_in = {...}
+	for k, p in pairs(pos_in) do
+		for i = 0, self.size - 1, 1 do
+			for j = 0, self.size -1, 1 do 
+				t_p = {self.pos.x + i, self.pos.y + j}
+				if p[1] == t_p[1] and p[2] == t_p[2] then
+					collision_detected = true
+				end
+			end
+		end
+	end
+
+	return collision_detected
+end
+
 function Player:show()
 	love.graphics.setColor(color[1])
 	love.graphics.rectangle("fill", self.pos.x, self.pos.y, self.size, self.size)
@@ -62,3 +80,18 @@ function Player:show()
 		end
 	end   
 end
+
+--Returns all the point thatmake up the pixels in the players sprite
+function Player:get_body()
+	local t_body = {}
+	for i = 0, self.size - 1, 1 do
+		for j = 0, self.size -1, 1 do 
+			local t_p = {self.pos.x + i, self.pos.y + j}
+			table.insert(t_body, {t_p[1], t_p[2]})
+		end
+	end
+
+	return t_body
+end
+
+

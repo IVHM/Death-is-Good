@@ -2,8 +2,8 @@
 
 --Enemy sprites are created out of individual pixels 
 --they are drawn based off of references to a grid atlas
---                            X
---ie enemy_shape = {2,4,6} = X X
+--                                   X
+--ie enemy_shape = "up" = {2,4,6} = X X
 
 
 ---------------------
@@ -62,11 +62,23 @@ function Enemy:show()
 	end
 end
 
---function Enemy:check
 
+function Enemy:check_collision(...)
+	local collision_detected = false
+	local pos_in = {...}
+	for ky,p in pairs(pos_in)do 
+		for k,v in pairs(self.body) do
+			if v[1] == p[1] and v[2] == p[2] then
+				collision_detected = true
+			end
+		end
+	end
+
+	return collision_detected
+end
 --Translates an enemies normal vector into a string based direction value 
 function get_direction(vec_in)
-	direction_out = "up"
+	local direction_out = "up"
 	if vec_in[1] == 0 then
 		if vec_in[2] == 1 then
 			direction_out = "down"
@@ -83,7 +95,7 @@ function get_direction(vec_in)
 end
 -- Used to create the enemy's sprite from it's current state
 function get_sprite(enemy_pos,variant, direction)
-	pixels_out = {}
+	local pixels_out = {}
 
 	for k, v in pairs(enemy_pixel_maps[variant][direction]) do
 		t_p = {x = enemy_pos.x + pixel_atlas[v][1],

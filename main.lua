@@ -60,6 +60,14 @@ function love.update( ... )
 			Player.last_move_time = crnt_time
 			Player:move(mov_vec)
 		end
+
+		if #enemies > 0 then
+			for k, c_enemy in pairs(enemies) do 
+				if Player:check_collision(c_enemy.body) then
+					print("collision detected")
+				end
+			end
+		end
 	end
 
 
