@@ -56,8 +56,8 @@ function Player:check_collision(...)
 		pos_in = pos_in[1]
 	end
 
-	for k, p in pairs(pos_in) do
-		for i = 0, self.size - 1, 1 do
+	for k, p in pairs(pos_in) do --Loop through the table of points
+		for i = 0, self.size - 1, 1 do --
 			for j = 0, self.size -1, 1 do 
 				t_p = {x = self.pos.x + i, y = self.pos.y + j}
 				if p.x == t_p.x and p.x == t_p.x then

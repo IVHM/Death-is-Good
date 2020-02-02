@@ -85,6 +85,7 @@ function love.update( ... )
 
 		if bullet_vec.x ~= 0 or bullet_vec.y ~= 0 then
 			Player.last_shot_time = crnt_time
+			local bul_len, bul_end_pos = bullet_collision(Player.pos, bullet_vec)
 			Player:shoot(bullet_vec)
 		end
 	end	
@@ -96,15 +97,50 @@ function love.draw( ... )
 	love.graphics.push()
 	love.graphics.scale(scale,scale)
 	Player:show()
-	enemies[1]:show()
+	
+	for k,v in pairs(enemies) do
+		v:show()
+	end
 	love.graphics.pop()
 end
 
 
 
 
-function bullet_collision(start_pos, bull_vec)
+function bullet_collision(start_pos, bull_vec_in)
+	local distance_traveled = 0
+	print("start_pos:", start_pos.x,start_pos.y)
+	print("bullet_vec:", bull_vec_in.x,bull_vec_in.y)
+	local crnt_pos = {x = start_pos.x + 1 + bull_vec_in.x,
+					  y = start_pos.y + 1 + bull_vec_in.y}
+	local calculating = true
 
+	while calculating do
+		-- Increment the ray path and distance measurement 
+		crnt_pos = {x = crnt_pos.x + bull_vec_in.x,
+					y = crnt_pos.y + bull_vec_in.y}
+		distance_traveled = distance_traveled + 1
+
+		for k,v in pairs(enemies) do
+			if v:check_collision(crnt_pos) then
+				print("enemy Hit")
+				enemies[k] = nil
+				calculating = false
+				break
+			end
+		end
+
+		if calculating then
+			if crnt_pos.x < -5 or crnt_pos.x > screen_width + 5 or
+			   crnt_pos.y < -5 or crnt_pos.y > screen_height + 5 then
+			 	print("NO enemy hit")
+			 	calculating = false
+			end
+		end
+
+	end
+
+	return distance_traveled, crnt_pos
 
 
 end

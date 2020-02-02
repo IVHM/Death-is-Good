@@ -57,7 +57,7 @@ end
 function Enemy:show()
 	-- 
 	for k, v in pairs(self.body) do
-		print("v: "..v.x)
+		--print("v: "..v.x)
 		love.graphics.rectangle("fill",v.x, v.y,1,1)
 	end
 end
@@ -66,7 +66,8 @@ end
 function Enemy:check_collision(...)
 	local collision_detected = false
 	local pos_in = {...}
-	if type(pos[1][1]) ~= "number" then
+	print(pos_in[1],pos_in[1][1])
+	if type(pos_in[1].x) ~= "number" then
 		pos_in = pos_in[1]
 	end
 
