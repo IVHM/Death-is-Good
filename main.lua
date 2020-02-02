@@ -35,7 +35,7 @@ function love.load()
 
 	enemies = {}
 	table.insert(enemies, 1, Enemy:new(nil))
-	enemies[1]:init_values({10,10}, {0,-1}, "base")
+	enemies[1]:init_values({x=10,y=10}, {x=0,y=-1}, "base")
 end
 
 
@@ -103,4 +103,9 @@ end
 
 
 
+function bullet_collision(start_pos, bull_vec)
+
+
+
+end
 

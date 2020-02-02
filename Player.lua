@@ -52,11 +52,15 @@ end
 function Player:check_collision(...)
 	local collision_detected = false
 	local pos_in = {...}
+	if type(pos_in[1][1]) ~= "number" then
+		pos_in = pos_in[1]
+	end
+
 	for k, p in pairs(pos_in) do
 		for i = 0, self.size - 1, 1 do
 			for j = 0, self.size -1, 1 do 
-				t_p = {self.pos.x + i, self.pos.y + j}
-				if p[1] == t_p[1] and p[2] == t_p[2] then
+				t_p = {x = self.pos.x + i, y = self.pos.y + j}
+				if p.x == t_p.x and p.x == t_p.x then
 					collision_detected = true
 				end
 			end
@@ -84,10 +88,12 @@ end
 --Returns all the point thatmake up the pixels in the players sprite
 function Player:get_body()
 	local t_body = {}
+	local n = 0
 	for i = 0, self.size - 1, 1 do
 		for j = 0, self.size -1, 1 do 
 			local t_p = {self.pos.x + i, self.pos.y + j}
-			table.insert(t_body, {t_p[1], t_p[2]})
+			n = n + 1
+			t_body[n] = {x = t_p[1], y = t_p[2]}
 		end
 	end
 

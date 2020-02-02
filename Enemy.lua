@@ -37,7 +37,7 @@ function Enemy:new(o)
 	setmetatable(o, self)
 	self.__index = self
 	self.pos.x, self.pos.y = 0, 0
-	self.normal = {0,-1}
+	self.normal = {x = 0, x = -1}
 	self.direction = "up"
 	self.variant = "base"
 	self.body = {};
@@ -46,7 +46,7 @@ end
 
 --MUST BE CALLED ON INITIALIZATION OR DATA WILL BE CORRUPTED
 function Enemy:init_values(pos_in, normal_in, variant_in)
-	self.pos.x, self.pos.y = pos_in[1], pos_in[2]
+	self.pos = pos_in
 	self.normal = normal_in
 	self.variant = variant_in
 	self.direction = get_direction(self.normal)
@@ -57,8 +57,8 @@ end
 function Enemy:show()
 	-- 
 	for k, v in pairs(self.body) do
-		print("v: "..v[1])
-		love.graphics.rectangle("fill",v[1], v[2],1,1)
+		print("v: "..v.x)
+		love.graphics.rectangle("fill",v.x, v.y,1,1)
 	end
 end
 
@@ -66,9 +66,13 @@ end
 function Enemy:check_collision(...)
 	local collision_detected = false
 	local pos_in = {...}
+	if type(pos[1][1]) ~= "number" then
+		pos_in = pos_in[1]
+	end
+
 	for ky,p in pairs(pos_in)do 
 		for k,v in pairs(self.body) do
-			if v[1] == p[1] and v[2] == p[2] then
+			if v.x == p.x and v.y == p.y then
 				collision_detected = true
 			end
 		end
@@ -76,16 +80,18 @@ function Enemy:check_collision(...)
 
 	return collision_detected
 end
+
+
 --Translates an enemies normal vector into a string based direction value 
 function get_direction(vec_in)
 	local direction_out = "up"
-	if vec_in[1] == 0 then
-		if vec_in[2] == 1 then
+	if vec_in.x == 0 then
+		if vec_in.x == 1 then
 			direction_out = "down"
 		end
-	elseif vec_in[1] == 1 then
+	elseif vec_in.x == 1 then
 		direction_out = "right"
-	elseif vec_in[1] == -1 then
+	elseif vec_in.x == -1 then
 		direction_out = "left"
 	else
 		print("Incorrect vector was entered in get_direction()")
@@ -93,17 +99,17 @@ function get_direction(vec_in)
 
 	return direction_out 
 end
+
+
 -- Used to create the enemy's sprite from it's current state
 function get_sprite(enemy_pos,variant, direction)
 	local pixels_out = {}
-
+	local n = 0
 	for k, v in pairs(enemy_pixel_maps[variant][direction]) do
-		t_p = {x = enemy_pos.x + pixel_atlas[v][1],
-			   y = enemy_pos.y + pixel_atlas[v][2]
-              }
-		table.insert(pixels_out, {t_p.x,t_p.y}) 
+		n = n + 1
+		pixels_out[n] = {x = enemy_pos.x + pixel_atlas[v][1],
+			   		     y = enemy_pos.y + pixel_atlas[v][2]}
 	end
-	
 	return pixels_out
 
 end
