@@ -92,8 +92,10 @@ function love.update( ... )
 
 		if bullet_vec.x ~= 0 or bullet_vec.y ~= 0 then
 			Player.last_shot_time = crnt_time
-			local bul_len, bul_end_pos = bullet_collision(Player.pos, bullet_vec)
-			Player:shoot(bullet_vec)
+			local bul_len = nil
+			local bul_end_pos = nil
+			bul_len, bul_end_pos = bullet_collision(Player.pos, bullet_vec)
+			Player:shoot(bullet_vec, bul_len)
 		end
 	end	
 

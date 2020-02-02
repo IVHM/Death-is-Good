@@ -34,10 +34,11 @@ function Player:move(mov_vec)
 end
 
 --Takes in a directional vector and intialize the bullet's properties
-function Player:shoot(shot_vec)
+function Player:shoot(shot_vec, bullet_len_in)
 	print("firing along vector :("..shot_vec.x..", "..shot_vec.y..")")
 	self.firing = true
 	self.fired_time = love.timer.getTime()
+	self.bullet_length = bullet_len_in
 	self.bullet_prop.x, self.bullet_prop.y = self.pos.x+1 + shot_vec.x,
 											 self.pos.y+1 + shot_vec.y 
 
