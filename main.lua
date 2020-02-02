@@ -61,6 +61,7 @@ function love.update( ... )
 			Player.last_move_time = crnt_time
 			Player:move(mov_vec)
 		end
+<<<<<<< HEAD
 
 		if #enemies > 0 then
 			for k, c_enemy in pairs(enemies) do 
@@ -79,6 +80,8 @@ function love.update( ... )
 				--end
 			end
 		end
+=======
+>>>>>>> parent of d051768... Add: rough collision detection functions
 	end
 
 
