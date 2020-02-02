@@ -49,7 +49,7 @@ function Player:shoot(shot_vec, bullet_length)
 											 (self.bullet_length * shot_vec.y) + 1
 	
 	print("bullet_prop:"..self.bullet_prop.x..",".. self.bullet_prop.y..","..
-											self.bullet_prop.h..",".. self.bullet_prop.w)											 
+						  self.bullet_prop.h..",".. self.bullet_prop.w)											 
 end
 
 
@@ -62,14 +62,12 @@ function Player:check_collisions(...)
 	end
 
 	for k, p in pairs(pos_in) do
-		local dis_between = math.sqrt((math.abs(p[1]-Player.pos.x)^2 + 
-			 		  	              (math.abs(p[2]-Player.pos.y))^2)) 
-		if dis_between < 1.5 then
+		if dis_between(p,self.pos) < 6 then
 			for i = 0, self.size - 1, 1 do
 				for j = 0, self.size -1, 1 do 
-					t_p = {self.pos.x + i, self.pos.y + j}
+					t_p = {x=self.pos.x + i, y=self.pos.y + j}
 					--print( "t_p:",t_p[1], t_p[1],"  p:", p[1],p[2])
-					if p[1] == t_p[1] and p[2] == t_p[2] then
+					if p.x == t_p.x and p.y == t_p.y then
 						collision_detected = true
 					end
 				end

@@ -66,6 +66,7 @@ function love.update( ... )
 			for k, c_enemy in pairs(enemies) do 
 				if Player:check_collisions(c_enemy.body) then
 					print("player collision detected TABLE")
+					print("c_enemy.pos",c_enemy.pos.x,c_enemy.pos.y)
 				end
 				--if Player:check_collisions({Player.pos.x, Player.pos.y}) then
 			    --	print("player collision detected POINT")
@@ -96,14 +97,23 @@ function love.update( ... )
 		if bullet_vec.x ~= 0 or bullet_vec.y ~= 0 then
 			Player.last_shot_time = crnt_time
 --			print(Player.pos.x+1+bullet_vec[1])
-			calculate_player_bullet(bullet_vec,{Player.pos.x+1+bullet_vec.x,
+			local b_dis, e_p = calculate_player_bullet(bullet_vec,
+											   {Player.pos.x+1+bullet_vec.x,
 												Player.pos.y+1+bullet_vec.y})
-			Player:shoot(bullet_vec)
+			Player:shoot(bullet_vec, b_dis)
 
 
 		end
 	end	
-end
+
+	if love.keyboard.isDown("m") then
+		print("Enemy pos: ", enemies[1].pos.x..", ".. enemies[1].pos.y)
+		print("Player pos: ", Player.pos.x..", "..Player.pos.y)
+		print("Enemy body: ", enemies[1].body[1][1]..", "..enemies[1].body[1][2].." \n"..
+							  enemies[1].body[2][1]..", "..enemies[1].body[2][2].." \n"..
+							  enemies[1].body[3][1]..", "..enemies[1].body[3][2])
+	end	
+end	
 
 
 -- Responsible for putting everything on the screen
@@ -135,6 +145,7 @@ function calculate_player_bullet(bul_vec, start_pos)
 					enemies[k] = nil
 					calculating = false
 					print("enemy :"..k.." hit by bullet")
+					break
 				end
 			end
 		end
