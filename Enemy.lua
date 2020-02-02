@@ -5,7 +5,7 @@ require("UTIL")
 --                                   X
 --ie enemy_shape = "up" = {2,4,6} = X X
 
-
+ 
 ---------------------
 --PIXEL SPRITE TABLES
 pixel_atlas = {{-1,-1},{0,-1},{1,-1},
@@ -70,11 +70,9 @@ function Enemy:check_collisions(...)
 		pos_in = pos_in[1]
 	end
 	for ky,p in pairs(pos_in)do
-		local dis_between = math.sqrt((math.abs(p[1]-Player.pos.x)^2 + 
-			 		  	              (math.abs(p[2]-Player.pos.y))^2)) 
-		if dis_between < 1.5 then
+		if dis_between(p, self.pos) < 6 then
 			for k,v in pairs(self.body) do
-				if v[1] == p[1] and v[2] == p[2] then
+				if v.x == p.x and v.y == p.y then
 					collision_detected = true
 				end
 			end
