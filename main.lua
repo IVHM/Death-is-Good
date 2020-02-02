@@ -34,9 +34,13 @@ function love.load()
 	color = {{0.78, 0.94,0.85},{0.26,0.32,0.24}}	
 
 	enemies = {}
+	max_enemies = 10
+	tot_enemies = 0
+	enemy_spawn_delay = 1.5
+	last_spawn_time = love.timer.getTime()
 	--table.insert(enemies, 1, Enemy:new(nil))
 	--enemies[1]:init_values({x=10,y=10}, {x=0,y=-1}, "base")
-	for i = 1, 5, 1 do
+	for i = 1, max_enemies, 1 do
 		spawn_enemy(true)
 	end
 end
@@ -93,6 +97,12 @@ function love.update( ... )
 		end
 	end	
 
+	-- ENEMY SPAWN CONTROLS
+	if tot_enemies < max_enemies then
+		if crnt_time - last_spawn_time > enemy_spawn_delay then
+			spawn_enemy(true)
+		end
+	end
 end
 
 
@@ -110,6 +120,7 @@ end
 
 
 function spawn_enemy(random, new_pos_in, new_normal_in, new_variant)
+	
 	if random then
 		local new_pos = {x=math.random(0, screen_width),
 						 y=math.random(0, screen_height)}
@@ -131,7 +142,7 @@ function spawn_enemy(random, new_pos_in, new_normal_in, new_variant)
 		enemies[#enemies]:init_values(new_pos_in, new_normal_in, new_variant_in)  
 	end
 
-	     
+	tot_enemies = tot_enemies + 1     
 end
 
 
@@ -155,6 +166,7 @@ function bullet_collision(start_pos, bull_vec_in)
 				print("enemy Hit")
 				enemies[k] = nil
 				calculating = false
+				tot_enemies = tot_enemies - 1
 				break
 			end
 		end
