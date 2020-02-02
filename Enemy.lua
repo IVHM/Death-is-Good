@@ -8,11 +8,16 @@
 
 ---------------------
 --PIXEL SPRITE TABLES
-pixel_atlas = {{-1,-1},{0,-1},{1,-1},
-			   {-1, 0},{0, 0},{1, 0},
-			   {-1, 1},{0, 1},{1, 1}
+pixel_atlas = {{-1,-1},{0,-1},{1,-1}, --|1|2|3|
+			   {-1, 0},{0, 0},{1, 0}, --|4|5|6|
+			   {-1, 1},{0, 1},{1, 1}  --|7|8|9|
 			  }
 
+variant_ratios = {
+	base   = {.6},
+	medium = {.2},
+	heavy  = {.1}
+}
 
 enemy_pixel_maps = {
 
@@ -21,6 +26,21 @@ enemy_pixel_maps = {
 		right = {2,6,8},
 		 down = {4,6,8},
 		 left = {2,4,8}
+	},
+
+	medium={
+		   up = {1,2,3,4,6}, -- this 
+		right = {2,3,6,8,9},
+		 down = {4,6,7,8,9},
+		 left = {1,2,4,7,8}		
+
+	},
+
+	heavy={
+		   up = {1,2,3,4,6,7,9}, -- this 
+		right = {1,2,3,6,7,8,9},
+		 down = {1,3,4,6,7,8,9},
+		 left = {1,2,3,4,7,8,9}
 	}
 }
 
@@ -29,7 +49,7 @@ enemy_pixel_maps = {
 --ENEMY CLASS
 Enemy = {
 	pos = {x=0,y=0},
-	normal = {0,-1}
+	normal = {x=0,y=-1}
 	}
 
 function Enemy:new(o)

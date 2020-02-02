@@ -34,8 +34,11 @@ function love.load()
 	color = {{0.78, 0.94,0.85},{0.26,0.32,0.24}}	
 
 	enemies = {}
-	table.insert(enemies, 1, Enemy:new(nil))
-	enemies[1]:init_values({x=10,y=10}, {x=0,y=-1}, "base")
+	--table.insert(enemies, 1, Enemy:new(nil))
+	--enemies[1]:init_values({x=10,y=10}, {x=0,y=-1}, "base")
+	for i = 1, 5, 1 do
+		spawn_enemy(true)
+	end
 end
 
 
@@ -89,6 +92,7 @@ function love.update( ... )
 			Player:shoot(bullet_vec)
 		end
 	end	
+
 end
 
 
@@ -104,6 +108,31 @@ function love.draw( ... )
 	love.graphics.pop()
 end
 
+
+function spawn_enemy(random, new_pos_in, new_normal_in, new_variant)
+	if random then
+		local new_pos = {x=math.random(0, screen_width),
+						 y=math.random(0, screen_height)}
+		
+		-- RANDOMLY SELECT A VARIANT USING THE ENEMY SPAWN WEIGHT CHART
+		local new_variant = nil
+		local t_rand = math.random()
+		local t_crnt_STAGE = 1
+		for k,v in pairs(variant_ratios) do
+			if t_rand <= v[t_crnt_STAGE] then
+				new_variant = k
+			end
+		end
+		local new_normal = {x=0,y=-1}
+		table.insert(enemies, Enemy:new())
+		enemies[#enemies]:init_values(new_pos, new_normal, new_variant)  
+	else 
+		table.insert(enemies, Enemy:new())
+		enemies[#enemies]:init_values(new_pos_in, new_normal_in, new_variant_in)  
+	end
+
+	     
+end
 
 
 
