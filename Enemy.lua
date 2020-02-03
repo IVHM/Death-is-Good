@@ -87,16 +87,20 @@ function Enemy:move()
 
 			self.move_map.mag = math.random(3,50)
 			self.move_map.step = 0
-
+ 
 			self.direction = get_direction(self.normal)
 			self.body = get_sprite(self.pos, self.variant, self.direction)
 		end
+
+		--Check if enemy has left screen
 		if self.pos.x < -10 and self.pos.x > screen_width + 10 then
 			self.normal.x = self.normal.x * -1
-		elseif self.pos.y < -10 and self.pos.y > screen_height + 10 then
+		end
+		if self.pos.y < -10 and self.pos.y > screen_height + 10 then
 			self.normal.y = self.normal.y * -1
 		end
-		 			
+
+		-- update enemy position
 		self.pos = {x = self.pos.x + self.normal.x,
 					y = self.pos.y + self.normal.y}
 		self.move_map.step = self.move_map.step + 1
