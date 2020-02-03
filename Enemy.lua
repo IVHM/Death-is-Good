@@ -1,11 +1,11 @@
 --enemy class 
-
+require("UTIL")
 --Enemy sprites are created out of individual pixels 
 --they are drawn based off of references to a grid atlas
---                                   X
---ie enemy_shape = "up" = {2,4,6} = X X
+--                            X
+--ie enemy_shape = {2,4,6} = X X
 
-
+ 
 ---------------------
 --PIXEL SPRITE TABLES
 pixel_atlas = {{-1,-1},{0,-1},{1,-1}, --|1|2|3|
@@ -124,15 +124,20 @@ end
 function Enemy:show()
 	-- 
 	for k, v in pairs(self.body) do
+
 		--print("v: "..v.x)
 		love.graphics.rectangle("fill",v.x, v.y,1,1)
+
 	end
 end
 
+--function Enemy:check
 
-function Enemy:check_collision(...)
+
+function Enemy:check_collisions(...)
 	local collision_detected = false
 	local pos_in = {...}
+
 	print(pos_in[1],pos_in[1][1])
 	if type(pos_in[1].x) ~= "number" then
 		pos_in = pos_in[1]
@@ -142,6 +147,7 @@ function Enemy:check_collision(...)
 		for k,v in pairs(self.body) do
 			if v.x == p.x and v.y == p.y then
 				collision_detected = true
+
 			end
 		end
 	end
@@ -150,11 +156,13 @@ function Enemy:check_collision(...)
 end
 
 
+
 --Translates an enemies normal vector into a string based direction value 
 function get_direction(vec_in)
 	local direction_out = "up"
 	if vec_in.x == 0 then
 		if vec_in.x == 1 then
+
 			direction_out = "down"
 		end
 	elseif vec_in.x == 1 then
@@ -171,8 +179,10 @@ end
 
 -- Used to create the enemy's sprite from it's current state
 function get_sprite(enemy_pos,variant, direction)
+
 	local pixels_out = {}
 	local n = 0
+
 	for k, v in pairs(enemy_pixel_maps[variant][direction]) do
 		n = n + 1
 		pixels_out[n] = {x = enemy_pos.x + pixel_atlas[v][1],

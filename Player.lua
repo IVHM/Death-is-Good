@@ -1,4 +1,5 @@
 --Player File
+require("UTIL")
 
 Player = {
 	
@@ -43,13 +44,14 @@ Player_animations = {
 
 }
 
---Updates players position
+
 function Player:move(mov_vec)
 	if self.alive then
 		self.pos.x = self.pos.x + mov_vec.x 
 		self.pos.y = self.pos.y + mov_vec.y
 	end
 end
+
 
 
 function Player:add_life()
@@ -72,25 +74,31 @@ function Player:shoot(shot_vec, bullet_len_in)
 		self.fired_time = love.timer.getTime()
 		self.bullet_length = bullet_len_in
 		self.bullet_prop.x, self.bullet_prop.y = self.pos.x+1 + shot_vec.x,
+
 											 self.pos.y+1 + shot_vec.y 
 
 		self.bullet_prop.w, self.bullet_prop.h = (self.bullet_length * shot_vec.x) + 1,
 											 (self.bullet_length * shot_vec.y) + 1
 	
+
 		print("bullet_prop:"..self.bullet_prop.x..",".. self.bullet_prop.y..","..
 										self.bullet_prop.h..",".. self.bullet_prop.w)											 
 		self.ammo = self.ammo - 1
 	end
 
+
 end
 
+
+
 -- Checks if the player is colliding with a certain 
-function Player:check_collision(...)
+function Player:check_collisions(...)
 	local collision_detected = false
 	local pos_in = {...}
 	if type(pos_in[1][1]) ~= "number" then
 		pos_in = pos_in[1]
 	end
+
 
 	for k, p in pairs(pos_in) do --Loop through the table of points
 		for i = 0, self.size - 1, 1 do --
@@ -98,6 +106,7 @@ function Player:check_collision(...)
 				t_p = {x = self.pos.x + i, y = self.pos.y + j}
 				if p.x == t_p.x and p.y == t_p.y then
 					collision_detected = true
+
 				end
 			end
 		end
@@ -105,6 +114,7 @@ function Player:check_collision(...)
 
 	return collision_detected
 end
+
 
 function Player:show()
 	if self.alive then
@@ -141,6 +151,7 @@ function Player:show()
 	end   
 end
 
+
 function  Player:was_hit()
 	local exploding = false
 	if self.alive then
@@ -174,5 +185,6 @@ function Player:get_body()
 
 	return t_body
 end
+
 
 
