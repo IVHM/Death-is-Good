@@ -7,7 +7,7 @@ Player = {
 	health = 5,
 	ammo = 6,
 	max_ammo = 6,
-	lives = 10,
+	lives = 9,
 	size = 3,
 
 	--Location
@@ -53,7 +53,9 @@ end
 
 
 function Player:add_life()
-	self.lives = self.lives + 1
+	if self.lives < 9 then
+		self.lives = self.lives + 1
+	end
 end
 
 function Player:lose_life()

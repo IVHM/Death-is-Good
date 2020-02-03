@@ -21,8 +21,9 @@ function love.load()
 	-- WINDOW DATA
 	screen_width = 84    --The base screen size
 	screen_height = 48
+	padding = 3          --How far off the screen enemies can move
 	scaled = true
-	scale = 6          --Scaling factor for readability
+	scale = 6            --Scaling factor for readability
 	screen_size = {["w"]=screen_width*scale, --Scaled screen size
 				   ["h"]=screen_height*scale} 
 	

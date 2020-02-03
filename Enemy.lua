@@ -50,8 +50,9 @@ enemy_pixel_maps = {
 Enemy = {
 	pos = {x=0,y=0},
 	normal = {x=0,y=-1},
-	move_delay = .08,
+	move_delay = .1,
 	move_map = {mag=1, step=0},
+	mag_limits = {std_dev=20, mean=30},
 	last_move_time = 0 -- love.timer.getTime() 
 	}
 
@@ -81,23 +82,32 @@ end
 function Enemy:move()
 	local crnt_time = love.timer.getTime()
 	if crnt_time - self.last_move_time > self.move_delay then
-		if self.move_map.step < self.move_map.mag then
+		if self.move_map.step > self.move_map.mag then
 			self.normal = {x = math.random(-1,1),
 						   y = math.random(-1,1)}
 
-			self.move_map.mag = math.random(3,50)
+			self.move_map.mag = math.floor(love.math.randomNormal( 
+									self.mag_limits.std_dev,
+									self.mag_limits.mean))
+			--print("random  mag", self.move_map.mag)
 			self.move_map.step = 0
  
 			self.direction = get_direction(self.normal)
-			self.body = get_sprite(self.pos, self.variant, self.direction)
 		end
 
 		--Check if enemy has left screen
-		if self.pos.x < -10 and self.pos.x > screen_width + 10 then
-			self.normal.x = self.normal.x * -1
+		print(screen_width, screen_height)
+		if self.pos.x < 1 then
+			self.normal.x = 1
 		end
-		if self.pos.y < -10 and self.pos.y > screen_height + 10 then
-			self.normal.y = self.normal.y * -1
+		if self.pos.x > screen_width then
+			self.normal.x = -1
+		end
+		if self.pos.y < 1 then
+			self.normal.y = 1
+		end
+		if self.pos.y > screen_height then
+			self.normal.y = -1
 		end
 
 		-- update enemy position
@@ -105,7 +115,7 @@ function Enemy:move()
 					y = self.pos.y + self.normal.y}
 		self.move_map.step = self.move_map.step + 1
 		self.last_move_time = crnt_time
-
+		self.body = get_sprite(self.pos, self.variant, self.direction)
 	end
 end
 
