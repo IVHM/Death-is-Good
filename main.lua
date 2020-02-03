@@ -13,6 +13,7 @@
 -- Entity libraries
 require("Enemy")
 require("Player")
+require("Sprite_sheets")
 
 
 
@@ -43,6 +44,10 @@ function love.load()
 	for i = 1, max_enemies, 1 do
 		spawn_enemy(true)
 	end
+
+	-- Lives_counter 
+	lives_counter_pos = {x=6,y=screen_height-5}
+
 end
 
 
@@ -51,6 +56,8 @@ function love.update( ... )
 	bullet_vec = {x=0,y=0}
 	crnt_time = love.timer.getTime()
 	
+
+
 	-- MOVEMENT CONTROLS
 	if crnt_time - Player.last_move_time >= Player.move_cooldown then -- constrains movement to frame ticks
 		if (love.keyboard.isDown("w") and Player.pos.y>1) then
@@ -68,10 +75,31 @@ function love.update( ... )
 			Player:move(mov_vec)
 		end
 
+		--PLAYER?ENEMY COLLISION HANDELING
 		if #enemies > 0 then
+			local exploding = false
 			for k, c_enemy in pairs(enemies) do 
 				if Player:check_collision(c_enemy.body) then
+					if Player:was_hit() then
+						enemies[k] = nil
+						exploding = true
+					end
 					print("collision detected")
+				end
+			end
+
+			-- KAMIKAZE MECHANIC
+			if exploding then
+				for i = -1, 4, 1 do 
+					for j = -1, 4,1 do 
+						for k, crnt_enemy in pairs(enemies) do
+							local t_p = {x = Player.pos.x + i,
+										 y = Player.pos.y + j}
+							if crnt_enemy:check_collision(t_p) then
+								enemies[k] = nil
+							end
+						end 
+					end
 				end
 			end
 		end
@@ -94,10 +122,16 @@ function love.update( ... )
 			Player.last_shot_time = crnt_time
 			local bul_len = nil
 			local bul_end_pos = nil
-			bul_len, bul_end_pos = bullet_collision(Player.pos, bullet_vec)
-			Player:shoot(bullet_vec, bul_len)
+			if Player.ammo > 0 then
+				bul_len, bul_end_pos = bullet_collision(Player.pos, bullet_vec)
+				Player:shoot(bullet_vec, bul_len)
+			end 
 		end
 	end	
+
+	for k,v in pairs(enemies) do
+		v:move()
+	end
 
 	-- ENEMY SPAWN CONTROLS
 	if tot_enemies < max_enemies then
@@ -117,6 +151,8 @@ function love.draw( ... )
 	for k,v in pairs(enemies) do
 		v:show()
 	end
+
+	draw_lives_counter(lives_counter_pos, Player.lives)
 	love.graphics.pop()
 end
 
@@ -167,6 +203,7 @@ function bullet_collision(start_pos, bull_vec_in)
 			if v:check_collision(crnt_pos) then
 				print("enemy Hit")
 				enemies[k] = nil
+				Player:add_life()
 				calculating = false
 				tot_enemies = tot_enemies - 1
 				break

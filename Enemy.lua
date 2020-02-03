@@ -49,7 +49,9 @@ enemy_pixel_maps = {
 --ENEMY CLASS
 Enemy = {
 	pos = {x=0,y=0},
-	normal = {x=0,y=-1}
+	normal = {x=0,y=-1},
+	move_delay = .1,
+	last_move_time = 0 -- love.timer.getTime() 
 	}
 
 function Enemy:new(o)
@@ -61,6 +63,7 @@ function Enemy:new(o)
 	self.direction = "up"
 	self.variant = "base"
 	self.body = {};
+	self.last_move_time = 0
 	return o
 end
 
@@ -72,6 +75,21 @@ function Enemy:init_values(pos_in, normal_in, variant_in)
 	self.direction = get_direction(self.normal)
 	self.body = get_sprite(self.pos, self.variant, self.direction)
 end
+
+-- 
+function Enemy:move()
+	local crnt_time = love.timer.getTime()
+	if crnt_time - self.last_move_time > self.move_delay then
+		self.normal = {x = math.random(-1,1),
+					   y = math.random(-1,1)}
+		self.direction = get_direction(self.normal)
+		self.pos = {x = self.pos.x + self.normal.x,
+					y = self.pos.y + self.normal.y}
+		self.body = get_sprite(self.pos, self.variant, self.direction)
+		self.last_move_time = crnt_time
+	end
+end
+
 
 --
 function Enemy:show()
