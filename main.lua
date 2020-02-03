@@ -180,6 +180,20 @@ function spawn_enemy(random, new_pos_in, new_normal_in, new_variant)
 		enemies[#enemies]:init_values(new_pos_in, new_normal_in, new_variant_in)  
 	end
 
+	local colliding = true
+
+	while colliding do
+		if Player:check_collision(enemies[#enemies].body) then
+			new_pos = {x=math.random(0, screen_width),
+					   y=math.random(0, screen_height)}
+			enemies[#enemies].pos = new_pos
+		else
+			colliding = false
+			break
+		end
+	end 
+
+
 	tot_enemies = tot_enemies + 1     
 end
 

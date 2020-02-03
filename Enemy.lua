@@ -50,7 +50,8 @@ enemy_pixel_maps = {
 Enemy = {
 	pos = {x=0,y=0},
 	normal = {x=0,y=-1},
-	move_delay = .1,
+	move_delay = .08,
+	move_map = {mag=1, step=0},
 	last_move_time = 0 -- love.timer.getTime() 
 	}
 
@@ -80,13 +81,27 @@ end
 function Enemy:move()
 	local crnt_time = love.timer.getTime()
 	if crnt_time - self.last_move_time > self.move_delay then
-		self.normal = {x = math.random(-1,1),
-					   y = math.random(-1,1)}
-		self.direction = get_direction(self.normal)
+		if self.move_map.step < self.move_map.mag then
+			self.normal = {x = math.random(-1,1),
+						   y = math.random(-1,1)}
+
+			self.move_map.mag = math.random(3,50)
+			self.move_map.step = 0
+
+			self.direction = get_direction(self.normal)
+			self.body = get_sprite(self.pos, self.variant, self.direction)
+		end
+		if self.pos.x < -10 and self.pos.x > screen_width + 10 then
+			self.normal.x = self.normal.x * -1
+		elseif self.pos.y < -10 and self.pos.y > screen_height + 10 then
+			self.normal.y = self.normal.y * -1
+		end
+		 			
 		self.pos = {x = self.pos.x + self.normal.x,
 					y = self.pos.y + self.normal.y}
-		self.body = get_sprite(self.pos, self.variant, self.direction)
+		self.move_map.step = self.move_map.step + 1
 		self.last_move_time = crnt_time
+
 	end
 end
 

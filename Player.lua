@@ -14,7 +14,7 @@ Player = {
 	pos = {x=42, y=24},
 
 	--Cooldowns 
-	move_cooldown = .06,
+	move_cooldown = .03,
 	shoot_cooldown = .2,
 	--Timers
 	last_move_time = love.timer.getTime(),
