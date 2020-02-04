@@ -61,6 +61,7 @@ function love.update( ... )
 	local bullet_vec = {x=0,y=0}
 	local crnt_time = love.timer.getTime()
 	
+	
 
 
 	-- MOVEMENT CONTROLS
@@ -90,15 +91,13 @@ function love.update( ... )
 						remove_enemy(k)
 						exploding = true
 					end
-
-					--print("collision detected")
-
+				end
 			end
 
 			-- KAMIKAZE MECHANIC
 			if exploding then
-				for i = -1, 4, 1 do 
-					for j = -1, 4,1 do 
+				for i = -2, 5, 1 do 
+					for j = -2, 5,1 do 
 						for k, crnt_enemy in pairs(enemies) do
 							local t_p = {x = Player.pos.x + i,
 										 y = Player.pos.y + j}

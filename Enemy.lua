@@ -160,7 +160,7 @@ end
 --function Enemy:check
 
 
-function Enemy:check_collisions(...)
+function Enemy:check_collision(...)
 	local collision_detected = false
 	local pos_in = {...}
 

@@ -1,10 +1,36 @@
 --Player File
 require("UTIL")
 
+firing_anim = {
+
+	up = {},
+	down = {},
+	left = {},
+	right = {}
+}
+
+--stores the location relative to player pos 
+-- as well as size of rectangle
+kamikaze_anim = {
+	--frame1
+	{{1,0,1,1},{0,1,1,1},{2,1,1,1},{1,2,1,1}},
+	--frame2
+	{{0,-1,3,1},{3,0,1,1},{-1,1,1,2},{0,3,3,1},{3,2,1,1}},
+	--frame3
+	{{-1,-3,2,1},{2,-3,2,1},{6,-3,1,1},{5,-1,1,1},{5,1,1,2},
+	 {5,4,1,1},{1,5,3,1},{-1,5,1,1},{-3,6,1,1},{-3,3,1,1},
+	 {-3,-1,1,3}, {-4,-4,1,1}},
+	--frame4
+	{{-1,-6,1,1},{5,-6,1,1},{8,-1,1,1},{8,3,1,1},{6,10,1,1},
+	 {-1,8,1,1},{-7,6,1,1},{-6,-2,1,1}}
+}
+	
+
+
 Player = {
 	
 	--Stats
-	gameover = false
+	gameover = false,
 	alive = true,
 	health = 5,
 	ammo = 6,
@@ -18,6 +44,7 @@ Player = {
 	--Cooldowns 
 	move_cooldown = .03,
 	shoot_cooldown = .2,
+
 	--Timers
 	last_move_time = love.timer.getTime(),
 	last_shot_time = love.timer.getTime(),
@@ -30,8 +57,21 @@ Player = {
 	bullet_length = 40,
 	bullet_prop = {x=0, y=0, w=1, h=1},
 
+	--Firing Player_animations
+	firing_anim_delay = .08, --delay between frames of Player_animations
+	firing_anim_step = 0,
+	firing_anim_step_max = 3,
+
+	--Kamikaze Animation control
+	kamikaze_anim_playing = false,
+	kamikaze_anim_delay = .08,
+	last_kamikaze_time = 0,
+	kamikaze_anim_cntr = 1,
+	kamikaze_anim_amt = 4,
+
 	--Respawn control
-	respawn_anim_delay = .2,
+	respawn_anim_last_frame = 0,
+	respawn_anim_delay = .05,
 	last_respawn_time = 0,
 	respawn_anim_cntr = 0,
 	respawn_anim_amt = 4 
@@ -54,15 +94,16 @@ function Player:move(mov_vec)
 end
 
 
-
 function Player:add_life()
 	if self.lives < 9 then
 		self.lives = self.lives + 1
 	end
 end
 
+
 function Player:lose_life()
 	self.live = self.lives -1
+
 	if self.lives == 0 then 
 		self.gameover = true
 	end
@@ -90,14 +131,11 @@ function Player:shoot(shot_vec, bullet_len_in)
 
 		self.ammo = self.ammo - 1
 	end
-
-
 end
 
 
-
 -- Checks if the player is colliding with a certain 
-function Player:check_collisions(...)
+function Player:check_collision(...)
 	local collision_detected = false
 	local pos_in = {...}
 	if type(pos_in[1][1]) ~= "number" then
@@ -122,10 +160,33 @@ end
 
 
 function Player:show()
+	local crnt_time = love.timer.getTime()
+
 	if self.alive then
 		Player:draw_sprite()
-	else
-		if love.timer.getTime() - self.last_respawn_time > self.respawn_anim_delay then
+	--KAMIKAZE ANIMATION CONTROL
+	elseif self.kamikaze_anim_playing then
+		if crnt_time - self.last_kamikaze_time > self.kamikaze_anim_delay then
+			self.last_kamikaze_time = crnt_time
+			self.kamikaze_anim_cntr = self.kamikaze_anim_cntr + 1
+			
+			print("Drawing kamikaze anim frame: ", self.kamikaze_anim_cntr)
+			
+			
+
+		end
+		for k,v in pairs(kamikaze_anim[self.kamikaze_anim_cntr]) do
+				love.graphics.rectangle("fill",self.pos.x + v[1],
+											   self.pos.y + v[2],
+												v[3],v[4])
+		end
+		if self.kamikaze_anim_cntr == self.kamikaze_anim_amt then
+			self.kamikaze_anim_playing = false
+			self.kamikaze_anim_cntr = 1
+			self.last_respawn_time = crnt_time
+		end
+	else 
+		if crnt_time - self.last_respawn_time > self.respawn_anim_delay then
 			self.respawn_anim_cntr = self.respawn_anim_cntr + 1
 			if self.respawn_anim_cntr % 2 == 0 then
 				Player:draw_sprite()
@@ -139,7 +200,7 @@ function Player:show()
 
 	--BULLET RENDERING CONTROL
 	if self.firing == true then
-		if love.timer.getTime() - self.fired_time > self.bullet_life then
+		if crnt_time - self.fired_time > self.bullet_life then
 			self.firing = false
 		else
 			love.graphics.setColor(color[1])
@@ -147,6 +208,8 @@ function Player:show()
 											self.bullet_prop.w, self.bullet_prop.h)
 		end
 	end
+
+	
 
 	--AMMO COUNTER DISPLAY
 	for i = 1, self.ammo, 1 do 
@@ -163,7 +226,8 @@ function  Player:was_hit()
 		self.alive = false
 		self.lives = self.lives - 1
 		exploding = true
-		self.last_respawn_time = love.timer.getTime()
+		self.kamikaze_anim_playing = true
+		self.last_kamikaze_time = love.timer.getTime()
 		self.ammo = self.max_ammo
 	end
 	return exploding
