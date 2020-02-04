@@ -7,13 +7,15 @@
 --                                           |___/                   
 --
 -- A Nokia 3310 Game Jam Submission
--- Created 1/31/20
+-- Created 1/31/20 
 -- By Hendrik M
 
 -- Entity libraries
 require("Enemy")
 require("Player")
+
 require("Sprite_sheets")
+
 
 
 
@@ -23,9 +25,11 @@ function love.load()
 	screen_height = 48
 	padding = 3          --How far off the screen enemies can move
 	scaled = true
+
 	scale = 6            --Scaling factor for readability
 	screen_size = {["w"]=screen_width*scale, --Scaled screen size
 				   ["h"]=screen_height*scale} 
+
 	
 	screen_center = {["x"]=screen_width/2, ["y"]= screen_height/2}
 	love.window.setMode(screen_size.w, screen_size.h) -- sets the screen size
@@ -53,9 +57,9 @@ end
 
 
 function love.update( ... )
-	mov_vec = {x=0,y=0}
-	bullet_vec = {x=0,y=0}
-	crnt_time = love.timer.getTime()
+	local mov_vec = {x=0,y=0}
+	local bullet_vec = {x=0,y=0}
+	local crnt_time = love.timer.getTime()
 	
 
 
@@ -76,6 +80,7 @@ function love.update( ... )
 			Player:move(mov_vec)
 		end
 
+
 		--PLAYER?ENEMY COLLISION HANDELING
 		if #enemies > 0 then
 			local exploding = false
@@ -85,8 +90,9 @@ function love.update( ... )
 						remove_enemy(k)
 						exploding = true
 					end
+
 					--print("collision detected")
-				end
+
 			end
 
 			-- KAMIKAZE MECHANIC
@@ -121,6 +127,7 @@ function love.update( ... )
 
 		if bullet_vec.x ~= 0 or bullet_vec.y ~= 0 then
 			Player.last_shot_time = crnt_time
+
 			local bul_len = nil
 			local bul_end_pos = nil
 			if Player.ammo > 0 then
@@ -145,8 +152,12 @@ function love.update( ... )
 end
 
 
+
+-- Responsible for putting everything on the screen
+-- ALL love.graphics calls must be called in thsi scope to render
 function love.draw( ... )
 	
+	--Scaled graphics go here
 	love.graphics.push()
 	love.graphics.scale(scale,scale)
 	Player:show()
@@ -163,6 +174,7 @@ function remove_enemy(key_in)
 	enemies[key_in] = nil
 	tot_enemies = tot_enemies - 1
 end
+
 
 function spawn_enemy(random, new_pos_in, new_normal_in, new_variant)
 	
@@ -203,6 +215,7 @@ function spawn_enemy(random, new_pos_in, new_normal_in, new_variant)
 
 	tot_enemies = tot_enemies + 1     
 end
+
 
 
 
