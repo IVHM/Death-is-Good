@@ -3,6 +3,7 @@
 Player = {
 	
 	--Stats
+	gameover = false
 	alive = true,
 	health = 5,
 	ammo = 6,
@@ -60,6 +61,9 @@ end
 
 function Player:lose_life()
 	self.live = self.lives -1
+	if self.lives == 0 then 
+		self.gameover = true
+	end
 end
 
 
@@ -67,7 +71,7 @@ end
 function Player:shoot(shot_vec, bullet_len_in)
 	
 	if self.ammo > 0 and self.alive then
-		print("firing along vector :("..shot_vec.x..", "..shot_vec.y..")")
+		--print("firing along vector :("..shot_vec.x..", "..shot_vec.y..")")
 		self.firing = true
 		self.fired_time = love.timer.getTime()
 		self.bullet_length = bullet_len_in
@@ -77,8 +81,8 @@ function Player:shoot(shot_vec, bullet_len_in)
 		self.bullet_prop.w, self.bullet_prop.h = (self.bullet_length * shot_vec.x) + 1,
 											 (self.bullet_length * shot_vec.y) + 1
 	
-		print("bullet_prop:"..self.bullet_prop.x..",".. self.bullet_prop.y..","..
-										self.bullet_prop.h..",".. self.bullet_prop.w)											 
+		--print("bullet_prop:"..self.bullet_prop.x..",".. self.bullet_prop.y..","..
+		--								self.bullet_prop.h..",".. self.bullet_prop.w)											 
 		self.ammo = self.ammo - 1
 	end
 

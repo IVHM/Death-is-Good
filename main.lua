@@ -38,7 +38,7 @@ function love.load()
 	enemies = {}
 	max_enemies = 10
 	tot_enemies = 0
-	enemy_spawn_delay = 1.5
+	enemy_spawn_delay = .5
 	last_spawn_time = love.timer.getTime()
 	--table.insert(enemies, 1, Enemy:new(nil))
 	--enemies[1]:init_values({x=10,y=10}, {x=0,y=-1}, "base")
@@ -82,10 +82,10 @@ function love.update( ... )
 			for k, c_enemy in pairs(enemies) do 
 				if Player:check_collision(c_enemy.body) then
 					if Player:was_hit() then
-						enemies[k] = nil
+						remove_enemy(k)
 						exploding = true
 					end
-					print("collision detected")
+					--print("collision detected")
 				end
 			end
 
@@ -97,7 +97,7 @@ function love.update( ... )
 							local t_p = {x = Player.pos.x + i,
 										 y = Player.pos.y + j}
 							if crnt_enemy:check_collision(t_p) then
-								enemies[k] = nil
+								remove_enemy(k)
 							end
 						end 
 					end
@@ -131,7 +131,9 @@ function love.update( ... )
 	end	
 
 	for k,v in pairs(enemies) do
-		v:move()
+		if v:move() then
+			remove_enemy(k)
+		end
 	end
 
 	-- ENEMY SPAWN CONTROLS
@@ -157,12 +159,16 @@ function love.draw( ... )
 	love.graphics.pop()
 end
 
+function remove_enemy(key_in)
+	enemies[key_in] = nil
+	tot_enemies = tot_enemies - 1
+end
 
 function spawn_enemy(random, new_pos_in, new_normal_in, new_variant)
 	
 	if random then
-		local new_pos = {x=math.random(0, screen_width),
-						 y=math.random(0, screen_height)}
+		local new_pos = {x=math.random(padding, screen_width - padding),
+						 y=math.random(padding, screen_height - padding)}
 		
 		-- RANDOMLY SELECT A VARIANT USING THE ENEMY SPAWN WEIGHT CHART
 		local new_variant = nil
@@ -185,9 +191,9 @@ function spawn_enemy(random, new_pos_in, new_normal_in, new_variant)
 
 	while colliding do
 		if Player:check_collision(enemies[#enemies].body) then
-			new_pos = {x=math.random(0, screen_width),
-					   y=math.random(0, screen_height)}
-			enemies[#enemies].pos = new_pos
+			new_pos = {x=math.random(padding, screen_width - padding),
+  			 		   y=math.random(padding, screen_height - padding)}			
+  			enemies[#enemies].pos = new_pos
 		else
 			colliding = false
 			break
@@ -202,8 +208,8 @@ end
 
 function bullet_collision(start_pos, bull_vec_in)
 	local distance_traveled = 0
-	print("start_pos:", start_pos.x,start_pos.y)
-	print("bullet_vec:", bull_vec_in.x,bull_vec_in.y)
+	--print("start_pos:", start_pos.x,start_pos.y)
+	--print("bullet_vec:", bull_vec_in.x,bull_vec_in.y)
 	local crnt_pos = {x = start_pos.x + 1 + bull_vec_in.x,
 					  y = start_pos.y + 1 + bull_vec_in.y}
 	local calculating = true
@@ -228,7 +234,7 @@ function bullet_collision(start_pos, bull_vec_in)
 		if calculating then
 			if crnt_pos.x < -5 or crnt_pos.x > screen_width + 5 or
 			   crnt_pos.y < -5 or crnt_pos.y > screen_height + 5 then
-			 	print("NO enemy hit")
+			 	--print("NO enemy hit")
 			 	calculating = false
 			end
 		end

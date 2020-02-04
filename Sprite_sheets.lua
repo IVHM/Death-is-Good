@@ -36,7 +36,7 @@ function draw_lives_counter(sprite_pos, number_in)
 	love.graphics.setColor(color[2])
 	love.graphics.rectangle("fill",sprite_pos.x - 2, sprite_pos.y -3, 9, 7)
 	love.graphics.setColor(color[1])
-	print(tens_place,ones_place)
+	--print(tens_place,ones_place)
 	-- Draw the pixels for the tens place
 	for k,v in pairs(number_sprites[tens_place]) do
 		local t_p = {x = numbers_atlas[v][1] + sprite_pos.x,

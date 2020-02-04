@@ -53,7 +53,12 @@ Enemy = {
 	move_delay = .1,
 	move_map = {mag=1, step=0},
 	mag_limits = {std_dev=20, mean=30},
-	last_move_time = 0 -- love.timer.getTime() 
+	last_move_time = 0, -- love.timer.getTime() 
+
+	needs_respawn = false,
+	exited_screen = false,
+	time_exited_screen = 0,
+	off_screen_max = 1 --
 	}
 
 function Enemy:new(o)
@@ -61,7 +66,7 @@ function Enemy:new(o)
 	setmetatable(o, self)
 	self.__index = self
 	self.pos.x, self.pos.y = 0, 0
-	self.normal = {x = 0, x = -1}
+	self.normal = {x = 0, y = -1}
 	self.direction = "up"
 	self.variant = "base"
 	self.body = {};
@@ -96,27 +101,48 @@ function Enemy:move()
 		end
 
 		--Check if enemy has left screen
-		print(screen_width, screen_height)
+		--print(screen_width, screen_height)
+
+		local still_off_screen = false
 		if self.pos.x < 1 then
 			self.normal.x = 1
+			still_off_screen = true
 		end
 		if self.pos.x > screen_width then
 			self.normal.x = -1
+			still_off_screen = true
 		end
 		if self.pos.y < 1 then
 			self.normal.y = 1
+			still_off_screen = true
 		end
 		if self.pos.y > screen_height then
 			self.normal.y = -1
+				still_off_screen = true
 		end
 
+		if still_off_screen then
+			if not self.exited_screen then
+				self.time_exited_screen = love.timer.getTime()
+				self.exited_screen = true
+			elseif love.timer.getTime() - self.time_exited_screen > self.off_screen_max then
+					self.needs_respawn = true
+				end 
+		elseif self.exited_screen then
+			self.exited_screen = false
+		end
+
+
 		-- update enemy position
+		--  ("<<<<<<<Test_check: ",self.normal, self.pos, self.variant, self.direction)
+
 		self.pos = {x = self.pos.x + self.normal.x,
 					y = self.pos.y + self.normal.y}
 		self.move_map.step = self.move_map.step + 1
 		self.last_move_time = crnt_time
 		self.body = get_sprite(self.pos, self.variant, self.direction)
 	end
+	return needs_respawn
 end
 
 
@@ -133,7 +159,7 @@ end
 function Enemy:check_collision(...)
 	local collision_detected = false
 	local pos_in = {...}
-	print(pos_in[1],pos_in[1][1])
+	--print(pos_in[1],pos_in[1][1])
 	if type(pos_in[1].x) ~= "number" then
 		pos_in = pos_in[1]
 	end
