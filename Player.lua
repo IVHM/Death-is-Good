@@ -35,7 +35,7 @@ Player = {
 	health = 5,
 	ammo = 6,
 	max_ammo = 6,
-	lives = 9,
+	lives = 2,
 	size = 3,
 
 	--Location
@@ -52,15 +52,19 @@ Player = {
 	--Bullet properties
 	firing = false,
 	fired_time = 0,
-	bullet_life = .08,
+	bullet_life = .1,
 	bullet_vec = {x=0, y=0},
 	bullet_length = 40,
 	bullet_prop = {x=0, y=0, w=1, h=1},
 
 	--Firing Player_animations
-	firing_anim_delay = .08, --delay between frames of Player_animations
-	firing_anim_step = 0,
-	firing_anim_step_max = 3,
+	firing_anim_delay = .025, --delay between frames of Player_animations
+	last_firing_anim = 0,
+	firing_anim_cntr = 0,
+	firing_anim_amt = 3,
+
+	laser_beam_shrink = .25,
+	laser_inc_amt = {x=0,y=0}, --Is the length of the rect * shrink ratio
 
 	--Kamikaze Animation control
 	kamikaze_anim_playing = false,
@@ -102,12 +106,22 @@ end
 
 
 function Player:lose_life()
-	self.lives = self.lives -1
+	self.lives = self.lives - 1
 	print("player lives: ", self.lives, "gameover?:", self.gameover)
 	if self.lives < 1 then 
 		self.gameover = true
 	end
 end
+
+function Player:respawn()
+	self.alive = true
+	self.gameover = false
+	self.lives = 9
+	self.ammo = 6
+	self.pos = {x=math.floor(screen_height/2),
+				y=math.floor(screen_width/2)}
+end
+
 
 
 --Takes in a directional vector and intialize the bullet's properties
@@ -124,11 +138,14 @@ function Player:shoot(shot_vec, bullet_len_in)
 
 		self.bullet_prop.w, self.bullet_prop.h = (self.bullet_length * shot_vec.x) + 1,
 											 (self.bullet_length * shot_vec.y) + 1
-	
+		self.laser_inc_amt.x , self.laser_inc_amt.y = self.bullet_length * shot_vec.x * self.laser_beam_shrink,
+													  self.bullet_length * shot_vec.y * self.laser_beam_shrink
+		self.last_firing_anim = love.timer.getTime()
 
-		--print("bullet_prop:"..self.bullet_prop.x..",".. self.bullet_prop.y..","..
-		--								self.bullet_prop.h..",".. self.bullet_prop.w)											 
-
+		print("bullet_prop:"..self.bullet_prop.x..",".. self.bullet_prop.y..","..
+										self.bullet_prop.h..",".. self.bullet_prop.w)											 
+		print("laser_inc_amt: ", self.laser_inc_amt.x,",",self.laser_inc_amt.y)
+		print("shot_vec:", shot_vec.x, shot_vec.y)
 		self.ammo = self.ammo - 1
 	end 
 end
@@ -201,6 +218,14 @@ function Player:show()
 
 	--BULLET RENDERING CONTROL
 	if self.firing == true then
+		if crnt_time - self.last_firing_anim > self.firing_anim_delay then
+			self.bullet_prop.x = self.bullet_prop.x + self.laser_inc_amt.x
+			self.bullet_prop.w = self.bullet_prop.w - self.laser_inc_amt.x
+			self.bullet_prop.y = self.bullet_prop.y + self.laser_inc_amt.y
+			self.bullet_prop.h = self.bullet_prop.h - self.laser_inc_amt.y
+			self.last_firing_anim = crnt_time
+		end
+
 		if crnt_time - self.fired_time > self.bullet_life then
 			self.firing = false
 		else

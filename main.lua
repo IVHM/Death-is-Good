@@ -70,8 +70,11 @@ function love.load()
 	lives_counter_pos = {x=6,y=screen_height-5}
 
 	--SCORE
+	start_time = love.timer.getTime()
+	end_time = nil
+	elapsed_time = {min=0,sec=0}
 	total_score = 0
-	score_increment_delay = 1
+	score_increment_delay = 3
 	last_score_increment = love.timer.getTime()
 
 
@@ -107,9 +110,11 @@ function love.update( ... )
 			end
 		end
 
+	-- RESTART FROM GAMEOVER
 	elseif current_state.restart then
-		Player.lives = 9
+		Player:respawn()
 		total_score = 0
+		start_time = crnt_time
 		max_enemies = default_max_enemies
 		enemy_spawn_delay = default_enemy_spawn_delay
 
@@ -117,6 +122,10 @@ function love.update( ... )
 			spawn_enemy()
 		end
 
+		current_state.running = true
+		current_state.restart = false
+
+	-- MAIN RUNNING STATE
 	elseif current_state.running then
 
 		--SCORE INCREMENTING
@@ -161,7 +170,11 @@ function love.update( ... )
 						if Player:was_hit() then
 							remove_enemy(k)
 							Player:lose_life()
+							total_score = total_score - 2
+							if total_score < 0 then total_score = 0 end
 							if Player.gameover then
+								end_time = crnt_time
+								get_elapsed_time()
 								current_state.game_over = true
 								current_state.running = false
 							end
@@ -172,8 +185,8 @@ function love.update( ... )
 
 				-- KAMIKAZE MECHANIC
 				if exploding then
-					for i = -2, 5, 1 do 
-						for j = -2, 5,1 do 
+					for i = -5, 8, 1 do 
+						for j = -5, 8,1 do 
 							for k, crnt_enemy in pairs(enemies) do
 								local t_p = {x = Player.pos.x + i,
 											 y = Player.pos.y + j}
@@ -250,9 +263,11 @@ function love.draw( ... )
 	love.graphics.push()
 	love.graphics.scale(scale,scale)
 
+	-- START SCREEN
 	if current_state.start then
 		love.graphics.draw(main_screen[crnt_main_screen_frame],0,0)
-	
+
+	-- MAIN SCREEN
 	elseif current_state.running then
 		love.graphics.setColor(color[2])
 		love.graphics.rectangle("fill",0,0,screen_width, screen_height)	
@@ -263,18 +278,34 @@ function love.draw( ... )
 		end
 
 		draw_lives_counter(lives_counter_pos, Player.lives)
+
+	-- GAMEOVER SCREEN
 	elseif current_state.game_over then
-		love.graphics.setColor(color[1])
+		love.graphics.setColor(color[2])
 		love.graphics.rectangle("fill",0,0,84,48)
-		love.graphics.draw(game_over_image, 20,20)
+		love.graphics.draw(game_over_image, 20,10)
+		love.graphics.setColor(color[1])
+		draw_lives_counter({x=20,y=28},total_score)
+		draw_lives_counter({x=20,y=35}, elapsed_time.min)
+		draw_lives_counter({x=29,y=35}, elapsed_time.sec)
+
 	end
 	love.graphics.pop()
 end
 
 
 function remove_enemy(key_in)
+	local t_variant = enemies[key_in].variant
+	if variant == "light" then
+		total_score = total_score + 2
+	elseif variant == "medium" then
+		total_score = total_score + 4
+	else
+		total_score = total_score + 8
+	end
 	enemies[key_in] = nil
 	tot_enemies = tot_enemies - 1
+
 end
 
 
@@ -319,8 +350,6 @@ function spawn_enemy(random, new_pos_in, new_normal_in, new_variant)
 end
 
 
-
-
 function bullet_collision(start_pos, bull_vec_in)
 	local distance_traveled = 0
 	--print("start_pos:", start_pos.x,start_pos.y)
@@ -339,6 +368,7 @@ function bullet_collision(start_pos, bull_vec_in)
 			if v:check_collision(crnt_pos) then
 				print("enemy Hit")
 				enemies[k] = nil
+				total_score = total_score + 1
 				Player:add_life()
 				calculating = false
 				tot_enemies = tot_enemies - 1
@@ -361,3 +391,9 @@ function bullet_collision(start_pos, bull_vec_in)
 
 end
 
+function get_elapsed_time()
+	local t_elap = math.ceil(end_time - start_time)
+	elapsed_time.sec = t_elap % 60
+	elapsed_time.min = (t_elap - elapsed_time.sec)/60
+
+end
