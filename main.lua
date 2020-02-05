@@ -37,13 +37,29 @@ function love.load()
 	print("Window stats:\n"..screen_center.x.." : "..screen_center.y)
 
 	-- COLORS AND FONT
-	color = {{0.78, 0.94,0.85},{0.26,0.32,0.24}}	
+	color = {{0.78, 0.94,0.85},{0.26,0.32,0.24}}
+
+	-- GAME STATES
+	current_state = {	
+		start = true,
+		restart = false,
+		running = false,
+		game_over = false}
 
 	enemies = {}
+	default_max_enemies = 10
 	max_enemies = 10
 	tot_enemies = 0
+	default_enemy_spawn_delay = .5
 	enemy_spawn_delay = .5
+	enemy_spawn_delay_increment = .002
+
+	tot_enemies_increment_delay = 3
+	last_tot_enemies_increment = love.timer.getTime()
+
+
 	last_spawn_time = love.timer.getTime()
+
 	--table.insert(enemies, 1, Enemy:new(nil))
 	--enemies[1]:init_values({x=10,y=10}, {x=0,y=-1}, "base")
 	for i = 1, max_enemies, 1 do
@@ -53,6 +69,22 @@ function love.load()
 	-- Lives_counter 
 	lives_counter_pos = {x=6,y=screen_height-5}
 
+	--SCORE
+	total_score = 0
+	score_increment_delay = 1
+	last_score_increment = love.timer.getTime()
+
+
+	--Image rferences
+	game_over_image = love.graphics.newImage("Gameover-1.png")
+	game_over_image:setFilter("nearest","nearest")
+	main_screen = {love.graphics.newImage("Main_screen-1.png"),
+				   love.graphics.newImage("Main_screen-2.png")}
+	main_screen[1]:setFilter("nearest")
+	main_screen[2]:setFilter("nearest")
+	main_screen_delay = .25
+	crnt_main_screen_frame = 1
+	last_main_screen = love.timer.getTime()
 end
 
 
@@ -61,91 +93,149 @@ function love.update( ... )
 	local bullet_vec = {x=0,y=0}
 	local crnt_time = love.timer.getTime()
 	
-	
-
-
-	-- MOVEMENT CONTROLS
-	if crnt_time - Player.last_move_time >= Player.move_cooldown then -- constrains movement to frame ticks
-		if (love.keyboard.isDown("w") and Player.pos.y>1) then
-			mov_vec.y = -1
-		elseif (love.keyboard.isDown("s") and Player.pos.y<screen_height-Player.size/2) then
-			mov_vec.y = 1	
-		elseif (love.keyboard.isDown("a") and Player.pos.x>1) then	
-			mov_vec.x = -1
-		elseif (love.keyboard.isDown("d") and Player.pos.x<screen_width-Player.size/2) then
-			mov_vec.x = 1
+	if current_state.start then
+		if love.keyboard.isDown("r") then
+			current_state.start = false
+			current_state.running = true
 		end
-		
-		if mov_vec.x ~= 0 or mov_vec.y ~= 0 then
-			Player.last_move_time = crnt_time
-			Player:move(mov_vec)
+		if crnt_time - last_main_screen > main_screen_delay then
+			last_main_screen = crnt_time
+			if crnt_main_screen_frame == 1 then
+				crnt_main_screen_frame = 2
+			else 
+				crnt_main_screen_frame =1
+			end
 		end
 
+	elseif current_state.restart then
+		Player.lives = 9
+		total_score = 0
+		max_enemies = default_max_enemies
+		enemy_spawn_delay = default_enemy_spawn_delay
 
-		--PLAYER?ENEMY COLLISION HANDELING
-		if #enemies > 0 then
-			local exploding = false
-			for k, c_enemy in pairs(enemies) do 
-				if Player:check_collision(c_enemy.body) then
-					if Player:was_hit() then
-						remove_enemy(k)
-						exploding = true
-					end
-				end
+		for i =1, 10, 1 do 
+			spawn_enemy()
+		end
+
+	elseif current_state.running then
+
+		--SCORE INCREMENTING
+		if crnt_time - last_score_increment > score_increment_delay then
+			last_score_increment= crnt_time
+			total_score = total_score + 1
+		end
+
+		-- ENEMEY SPAWN INCREMENTING
+		if crnt_time - last_tot_enemies_increment > tot_enemies_increment_delay then
+			last_tot_enemies_increment = crnt_time
+			max_enemies = max_enemies + 1
+			enemy_spawn_delay = enemy_spawn_delay - enemy_spawn_delay_increment
+		end
+
+		-- MOVEMENT CONTROLS
+		if crnt_time - Player.last_move_time >= Player.move_cooldown then -- constrains movement to frame ticks
+			if (love.keyboard.isDown("w") and Player.pos.y>1) then
+				mov_vec.y = -1
+			elseif (love.keyboard.isDown("s") and Player.pos.y<screen_height-Player.size/2) then
+				mov_vec.y = 1	
+			elseif (love.keyboard.isDown("a") and Player.pos.x>1) then	
+				mov_vec.x = -1
+			elseif (love.keyboard.isDown("d") and Player.pos.x<screen_width-Player.size/2) then
+				mov_vec.x = 1
+			end
+			
+			if mov_vec.x ~= 0 or mov_vec.y ~= 0 then
+				Player.last_move_time = crnt_time
+				Player:move(mov_vec)
 			end
 
-			-- KAMIKAZE MECHANIC
-			if exploding then
-				for i = -2, 5, 1 do 
-					for j = -2, 5,1 do 
-						for k, crnt_enemy in pairs(enemies) do
-							local t_p = {x = Player.pos.x + i,
-										 y = Player.pos.y + j}
-							if crnt_enemy:check_collision(t_p) then
-								remove_enemy(k)
+			if Player.gameover then
+				current_state.game_over = true
+			end
+
+			--PLAYER?ENEMY COLLISION HANDELING
+			if #enemies > 0 then
+				local exploding = false
+				for k, c_enemy in pairs(enemies) do 
+					if Player:check_collision(c_enemy.body) then
+						if Player:was_hit() then
+							remove_enemy(k)
+							Player:lose_life()
+							if Player.gameover then
+								current_state.game_over = true
+								current_state.running = false
 							end
-						end 
+							exploding = true
+						end
+					end
+				end
+
+				-- KAMIKAZE MECHANIC
+				if exploding then
+					for i = -2, 5, 1 do 
+						for j = -2, 5,1 do 
+							for k, crnt_enemy in pairs(enemies) do
+								local t_p = {x = Player.pos.x + i,
+											 y = Player.pos.y + j}
+								if crnt_enemy:check_collision(t_p) then
+									remove_enemy(k)
+								end
+							end 
+						end
 					end
 				end
 			end
 		end
-	end
 
 
-	-- FIRING CONTROLS
-	if crnt_time - Player.last_shot_time >= Player.shoot_cooldown then
-		if love.keyboard.isDown("up") then
-			bullet_vec.y = -1
-		elseif love.keyboard.isDown("down") then
-			bullet_vec.y = 1
-		elseif love.keyboard.isDown("right") then
-			bullet_vec.x = 1
-		elseif love.keyboard.isDown("left") then
-			bullet_vec.x = -1
+		-- FIRING CONTROLS
+		if crnt_time - Player.last_shot_time >= Player.shoot_cooldown then
+			if love.keyboard.isDown("up") then
+				bullet_vec.y = -1
+			elseif love.keyboard.isDown("down") then
+				bullet_vec.y = 1
+			elseif love.keyboard.isDown("right") then
+				bullet_vec.x = 1
+			elseif love.keyboard.isDown("left") then
+				bullet_vec.x = -1
+			end
+
+			if bullet_vec.x ~= 0 or bullet_vec.y ~= 0 then
+				Player.last_shot_time = crnt_time
+
+				local bul_len = nil
+				local bul_end_pos = nil
+				if Player.ammo > 0 then
+					bul_len, bul_end_pos = bullet_collision(Player.pos, bullet_vec)
+					Player:shoot(bullet_vec, bul_len)
+				end 
+			end
+		end	
+
+		for k,v in pairs(enemies) do
+			if v:move() then
+				remove_enemy(k)
+			end
 		end
 
-		if bullet_vec.x ~= 0 or bullet_vec.y ~= 0 then
-			Player.last_shot_time = crnt_time
-
-			local bul_len = nil
-			local bul_end_pos = nil
-			if Player.ammo > 0 then
-				bul_len, bul_end_pos = bullet_collision(Player.pos, bullet_vec)
-				Player:shoot(bullet_vec, bul_len)
-			end 
+		-- ENEMY SPAWN CONTROLS
+		if tot_enemies < max_enemies then
+			if crnt_time - last_spawn_time > enemy_spawn_delay then
+				spawn_enemy(true)
+			end
 		end
-	end	
 
-	for k,v in pairs(enemies) do
-		if v:move() then
+		if Player.gameover then
+			current_state.game_over = true
+		end
+
+	elseif current_state.game_over then
+		if love.keyboard.isDown("r") then
+			current_state.game_over = false
+			current_state.restart = true
+		end
+		for k,v in pairs(enemies) do
 			remove_enemy(k)
-		end
-	end
-
-	-- ENEMY SPAWN CONTROLS
-	if tot_enemies < max_enemies then
-		if crnt_time - last_spawn_time > enemy_spawn_delay then
-			spawn_enemy(true)
 		end
 	end
 end
@@ -159,15 +249,28 @@ function love.draw( ... )
 	--Scaled graphics go here
 	love.graphics.push()
 	love.graphics.scale(scale,scale)
-	Player:show()
-	
-	for k,v in pairs(enemies) do
-		v:show()
-	end
 
-	draw_lives_counter(lives_counter_pos, Player.lives)
+	if current_state.start then
+		love.graphics.draw(main_screen[crnt_main_screen_frame],0,0)
+	
+	elseif current_state.running then
+		love.graphics.setColor(color[2])
+		love.graphics.rectangle("fill",0,0,screen_width, screen_height)	
+		Player:show()
+		
+		for k,v in pairs(enemies) do
+			v:show()
+		end
+
+		draw_lives_counter(lives_counter_pos, Player.lives)
+	elseif current_state.game_over then
+		love.graphics.setColor(color[1])
+		love.graphics.rectangle("fill",0,0,84,48)
+		love.graphics.draw(game_over_image, 20,20)
+	end
 	love.graphics.pop()
 end
+
 
 function remove_enemy(key_in)
 	enemies[key_in] = nil

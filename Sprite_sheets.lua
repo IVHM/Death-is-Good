@@ -26,6 +26,7 @@ number_sprites = {
 function draw_lives_counter(sprite_pos, number_in)
 
 	if number_in > 99 then print("no numbers larger than 99") end
+	if number_in < 0 then number_in = number_in * -1 end
 
 	local ones_place = number_in % 10
 	local tens_place = (number_in - ones_place) / 10

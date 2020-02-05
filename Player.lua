@@ -102,9 +102,9 @@ end
 
 
 function Player:lose_life()
-	self.live = self.lives -1
-
-	if self.lives == 0 then 
+	self.lives = self.lives -1
+	print("player lives: ", self.lives, "gameover?:", self.gameover)
+	if self.lives < 1 then 
 		self.gameover = true
 	end
 end
@@ -130,7 +130,7 @@ function Player:shoot(shot_vec, bullet_len_in)
 		--								self.bullet_prop.h..",".. self.bullet_prop.w)											 
 
 		self.ammo = self.ammo - 1
-	end
+	end 
 end
 
 
@@ -175,6 +175,7 @@ function Player:show()
 			
 
 		end
+		love.graphics.setColor(color[1])
 		for k,v in pairs(kamikaze_anim[self.kamikaze_anim_cntr]) do
 				love.graphics.rectangle("fill",self.pos.x + v[1],
 											   self.pos.y + v[2],
@@ -210,12 +211,18 @@ function Player:show()
 	end
 
 	
-
 	--AMMO COUNTER DISPLAY
-	for i = 1, self.ammo, 1 do 
+	for i = 1, 6, 1 do 
 		local t_x = 32 + (4 * i) 
 		t_y = 44
-		love.graphics.rectangle("fill", t_x , t_y , 2,3)
+		if i <= self.ammo then
+			love.graphics.setColor(color[1])
+			love.graphics.rectangle("fill", t_x , t_y , 2,3)
+		else
+			love.graphics.setColor(color[1])
+			love.graphics.rectangle("line", t_x, t_y,2,3)
+
+		end
 	end   
 end
 
@@ -224,7 +231,6 @@ function  Player:was_hit()
 	local exploding = false
 	if self.alive then
 		self.alive = false
-		self.lives = self.lives - 1
 		exploding = true
 		self.kamikaze_anim_playing = true
 		self.last_kamikaze_time = love.timer.getTime()
@@ -240,6 +246,8 @@ function Player:draw_sprite()
 	love.graphics.rectangle("fill", self.pos.x + 2, self.pos.y - 1, 1,1)
 	love.graphics.rectangle("fill", self.pos.x + 3, self.pos.y + 2, 1, 1)
 end
+
+
 --Returns all the point thatmake up the pixels in the players sprite
 function Player:get_body()
 	local t_body = {}

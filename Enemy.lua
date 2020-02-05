@@ -148,7 +148,7 @@ end
 
 --
 function Enemy:show()
-	-- 
+	love.graphics.setColor(color[1])
 	for k, v in pairs(self.body) do
 
 		--print("v: "..v.x)
